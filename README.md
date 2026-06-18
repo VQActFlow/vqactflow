@@ -15,7 +15,6 @@ index.html            page content
 css/style.css          styling
 js/main.js              "copy BibTeX" button behavior
 assets/figures/         figures extracted from the paper
-assets/paper/           paper PDF, linked from the "Paper (PDF)" button
 .nojekyll               tells GitHub Pages to skip Jekyll processing
 ```
 
