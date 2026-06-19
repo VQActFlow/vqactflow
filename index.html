@@ -56,11 +56,10 @@
     </div>
 
     <nav class="toc">
+      <a href="#video">Video</a>
       <a href="#abstract">Abstract</a>
       <a href="#method">Method</a>
-      <a href="#contributions">Contributions</a>
       <a href="#experiments">Experiments</a>
-      <a href="#conclusion">Conclusion</a>
       <a href="#bibtex">Citation</a>
     </nav>
   </div>
@@ -68,34 +67,26 @@
 
 <main>
 
-  <section id="abstract">
+  <section id="video">
+    <div class="container">
+      <div class="video-wrap">
+        <iframe src="https://www.youtube.com/embed/tspKPOIrDx0" title="VQActFlow video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+      </div>
+    </div>
+  </section>
+
+  <section id="abstract" class="alt">
     <div class="container">
       <div class="section-kicker">Abstract</div>
-      <h2 class="section-title">Explicit action-mode commitment for multi-task policies</h2>
-      <div class="prose">
-        <p>
-          Multi-task robot manipulation policies are challenging to learn from demonstration because a single network
-          must select among qualitatively different action modes from a multimodal demonstration distribution,
-          conditioned on language and visual context. A wrong mode selection means executing the wrong task or an
-          action infeasible in the scene. Tokenizing continuous actions into a learned discrete codebook separates
-          these modes at the representation level, offering structural advantages for multi-task learning.
-        </p>
-        <p>
-          We propose <strong>VQActFlow</strong>, a multi-task manipulation policy that tokenizes action chunks and
-          generates code sequences via Variational Flow Matching. VQActFlow maintains an explicit preference over
-          action modes throughout generation. Inference-time guidance acts on this preference to steer mode
-          commitment. We instantiate this with classifier-free guidance over language conditioning, which steers the
-          policy toward the instructed action mode, and a learned codebook critic that supplies a complementary
-          feasibility signal.
-        </p>
-        <p>
-          We evaluate VQActFlow on three platforms: the LIBERO simulation benchmarks, a Unitree G1 humanoid
-          performing whole-body pick-and-place, and an ALOHA-style bimanual platform performing contact-rich tasks.
-          Across these benchmarks, VQActFlow outperforms both continuous and discrete baselines.
-        </p>
-      </div>
+      <p class="lede">
+        Multi-task manipulation requires picking the right action mode for the task at hand &mdash; the wrong pick
+        means the wrong task. <strong>VQActFlow</strong> tokenizes action chunks into a discrete codebook and
+        generates code sequences with Variational Flow Matching, keeping an explicit, steerable preference over
+        action modes throughout generation. Classifier-free guidance and a learned codebook critic steer that
+        preference at inference time &mdash; no retraining needed.
+      </p>
 
-      <div class="stat-grid" style="margin-top:44px;">
+      <div class="stat-grid" style="margin-top:32px;">
         <div class="stat-card">
           <span class="stat-value">81.0%</span>
           <span class="stat-label">LIBERO-Goal peak success (w=4), vs. 61.5% for the closest discrete baseline</span>
@@ -116,140 +107,64 @@
     </div>
   </section>
 
-  <section id="method" class="alt">
+  <section id="method">
     <div class="container">
       <div class="section-kicker">Method</div>
-      <h2 class="section-title">Tokenize actions, generate with Variational Flow Matching, steer at inference</h2>
+      <h2 class="section-title">Tokenize, generate, steer</h2>
 
       <div class="figure-block">
         <figure>
           <img src="assets/figures/fig1_framework.png" alt="VQActFlow framework: VQ-VAE action tokenization followed by a Variational Flow Matching policy with CFG and codebook critic guidance.">
-          <figcaption><strong>Figure 1.</strong> VQActFlow framework. <strong>Stage 1:</strong> a VQ-VAE encoder
-            tokenizes action chunks into discrete codebook indices, and a decoder reconstructs actions from the
-            quantized embeddings. <strong>Stage 2:</strong> a VFM policy transports Gaussian noise toward codebook
-            embeddings, maintaining an explicit preference over action modes that inference-time guidance steers —
-            CFG toward the instructed task and a codebook critic toward feasible modes.</figcaption>
+          <figcaption><strong>Figure 1.</strong> A VQ-VAE tokenizes action chunks into a discrete codebook. A
+            Variational Flow Matching policy generates code sequences while keeping logits over the full codebook at
+            every step &mdash; a categorical preference that CFG and a codebook critic can steer.</figcaption>
         </figure>
       </div>
 
-      <div class="prose">
-        <p>
-          Diffusion and flow matching policies have become the prevailing paradigm for visuomotor manipulation, and
-          classifier-free guidance (CFG) is the standard tool for biasing them at inference. These policies generate
-          in a continuous action or latent space where action modes are not explicitly represented, so guidance
-          reshapes a single continuous distribution rather than selecting among discrete action modes. Vector-quantized
-          codebooks instead learn a finite vocabulary of action primitives whose discrete bottleneck separates modes
-          explicitly &mdash; exactly the structure the multi-task setting requires. The closest prior work, Discrete
-          Policy, tokenizes actions with a VQ-VAE but generates codes by diffusion in continuous space, recovering
-          discrete indices by nearest-neighbor lookup only at the <em>end</em> of sampling, abandoning the discrete
-          structure during generation.
-        </p>
-        <p>
-          VQActFlow instead makes action-mode commitment explicit throughout generation. An action chunk is first
-          tokenized by a frozen VQ-VAE into a short sequence of indices into a learned codebook of action primitives.
-          A Diffusion-Transformer policy then generates this code sequence via <strong>Variational Flow Matching
-          (VFM)</strong>: it transports Gaussian noise toward codebook embeddings, but is trained with a
-          cross-entropy loss over ground-truth code indices rather than an L2 regression toward embeddings. This means
-          the network produces <em>logits over the full codebook at every integration step</em> &mdash; a categorical
-          posterior that is carried within a continuous transport, rather than recovered only at the end.
-        </p>
-        <p>
-          That categorical posterior is a single, unified interface for inference-time guidance. We instantiate it
-          with two complementary mechanisms:
-        </p>
-      </div>
+      <p class="lede">
+        Most flow-matching policies generate in a continuous space with no explicit notion of action mode, so
+        guidance just reshapes one continuous distribution. VQActFlow keeps a discrete, steerable preference over
+        action modes throughout generation, not just at the end of sampling.
+      </p>
 
       <ul class="contrib-list">
         <li>
           <span class="num">1</span>
-          <div><strong>Classifier-free guidance on language conditioning.</strong> The conditional and unconditional
-          logits are linearly extrapolated at every step, sharpening the policy's commitment to the
-          language-instructed action mode and correcting wrong-task errors under ambiguous observations.</div>
+          <div><strong>CFG on language conditioning.</strong> Extrapolates conditional vs. unconditional logits at
+          every step to sharpen commitment to the instructed task.</div>
         </li>
         <li>
           <span class="num">2</span>
-          <div><strong>A contrastively-trained codebook critic.</strong> A small transformer scores the feasibility of
-          a code distribution given the scene and language, trained with an InfoNCE objective against negatives that
-          violate temporal coherence, code distribution, observation grounding, and language grounding. Its gradient
-          nudges the policy's categorical distribution toward feasible modes, with guidance strength scheduled by the
-          entropy of the current distribution &mdash; weak while the distribution is still diffuse, strong once it
-          has crystallized.</div>
+          <div><strong>A learned codebook critic.</strong> A small contrastively-trained transformer scores
+          feasibility and nudges the distribution toward feasible modes.</div>
         </li>
       </ul>
 
-      <div class="prose" style="margin-top:28px;">
-        <p>
-          Because both mechanisms act on the same categorical preference rather than on decoded actions or a
-          continuous velocity field, their contributions accumulate at each integration step and can be combined
-          without retraining the policy.
-        </p>
-      </div>
-    </div>
-  </section>
-
-  <section id="contributions">
-    <div class="container">
-      <div class="section-kicker">Contributions</div>
-      <h2 class="section-title">What this paper adds</h2>
-      <ul class="contrib-list">
-        <li>
-          <span class="num">1</span>
-          <div>VQActFlow, a multi-task manipulation policy that generates action tokens via Variational Flow Matching,
-          maintaining an explicit preference over action modes throughout generation.</div>
-        </li>
-        <li>
-          <span class="num">2</span>
-          <div>Guidance through this categorical interface effectively steers action-mode selection at inference
-          time; we introduce a novel contrastively-trained codebook critic that supplies a feasibility signal,
-          operating on its own or alongside CFG.</div>
-        </li>
-        <li>
-          <span class="num">3</span>
-          <div>Evaluation on the LIBERO benchmarks and on bimanual and humanoid hardware, demonstrating improved
-          performance over both continuous and discrete baselines.</div>
-        </li>
-      </ul>
+      <p class="lede" style="margin-top:24px;">
+        Both act on the same categorical preference, so their effects accumulate and combine without retraining.
+      </p>
     </div>
   </section>
 
   <section id="experiments" class="alt">
     <div class="container">
       <div class="section-kicker">Experiments</div>
-      <h2 class="section-title">LIBERO simulation, a G1 humanoid, and an ALOHA-style bimanual platform</h2>
+      <h2 class="section-title">LIBERO, a G1 humanoid, and an ALOHA-style bimanual platform</h2>
       <p class="lede">
-        VQActFlow uses a flat VQ-VAE codebook of size K=512, a 12-layer DiT policy backbone (d<sub>model</sub>=1024,
-        8 heads), and a 3-layer codebook critic, with a frozen CLIP-B/32 text encoder and shared ResNet-18 visual
-        encoder. All baselines are trained under matched protocol &mdash; identical encoders, data, steps, and seeds.
+        VQActFlow outperforms continuous and discrete baselines across all three platforms, under matched encoders,
+        data, and training steps.
       </p>
 
       <!-- LIBERO-Goal -->
       <div class="exp-block">
-        <h3>CFG evaluation on LIBERO-Goal</h3>
-        <p class="exp-sub">Does guidance through the categorical interface beat guidance through a continuous proxy?</p>
-
-        <div class="figure-row">
-          <figure>
-            <img src="assets/figures/fig2_cfg_sweep.png" alt="LIBERO-Goal success rate vs. CFG weight for VQActFlow and Discrete Policy.">
-            <figcaption><strong>Figure 2.</strong> Success rate vs. CFG weight. VQActFlow peaks at w=4 (81.0%) then
-              degrades at higher weights; Discrete Policy requires stronger guidance (w=6) to reach a substantially
-              lower ceiling (61.5%). Shaded: &plusmn;1 std across 10 tasks.</figcaption>
-          </figure>
-          <figure>
-            <img src="assets/figures/fig3_radar.png" alt="Per-task LIBERO-Goal success rate radar chart at three CFG weights.">
-            <figcaption><strong>Figure 3.</strong> Per-task success at three CFG weights. The w=4 polygon expands on
-              tasks with substantial unguided headroom (e.g. "wine on top cabinet": 65&rarr;85%) and contracts on
-              near-ceiling tasks (e.g. "middle drawer": 90&rarr;75%).</figcaption>
-          </figure>
-        </div>
+        <h3>CFG on LIBERO-Goal</h3>
+        <p class="exp-sub">Guidance through the categorical interface beats guidance through a continuous proxy.</p>
 
         <div class="figure-block">
           <figure>
-            <img src="assets/figures/fig4_cfg_weights.png" alt="Rollout frames showing success, wrong-task, and missed-grasp failure modes at different CFG weights.">
-            <figcaption><strong>Figure 4.</strong> CFG weight effects on "open the top drawer and put the bowl
-              inside." At low w the policy executes a coherent action on the <em>wrong object</em> (unconditional
-              marginal insufficiently suppressed). At high w the policy reaches the correct object but
-              <em>misses the grasp</em> (aggressive amplification degrades execution precision). The optimum trades
-              off these two failure regimes.</figcaption>
+            <img src="assets/figures/fig2_cfg_sweep.png" alt="LIBERO-Goal success rate vs. CFG weight for VQActFlow and Discrete Policy.">
+            <figcaption><strong>Figure 2.</strong> Success rate vs. CFG weight. VQActFlow peaks at w=4 (81.0%);
+              Discrete Policy needs stronger guidance to reach a lower ceiling (61.5%).</figcaption>
           </figure>
         </div>
       </div>
@@ -298,14 +213,13 @@
       <!-- Humanoid -->
       <div class="exp-block">
         <h3>Humanoid whole-body manipulation</h3>
-        <p class="exp-sub">A Unitree G1 with two Inspire dexterous hands, four shared-workspace pick-and-place tasks that differ only in target object and instruction.</p>
+        <p class="exp-sub">A Unitree G1 with two dexterous hands, four shared-workspace pick-and-place tasks differing only in target object and instruction.</p>
 
         <div class="figure-block">
           <figure>
             <img src="assets/figures/fig5_humanoid.png" alt="Unitree G1 humanoid experimental setup and four pick-and-place evaluation tasks.">
-            <figcaption><strong>Figure 5.</strong> G1 humanoid setup and tasks. (a) Multitask tabletop scene. (b&ndash;e)
-              Place the red ball / cup / bottle / medicine bottle into the box. 140 VR-teleoperated demonstrations per
-              task via TWIST2; 20 rollouts per task at w=1 and w=6.</figcaption>
+            <figcaption><strong>Figure 3.</strong> G1 humanoid setup and tasks: place the red ball / cup / bottle /
+              medicine bottle into the box.</figcaption>
           </figure>
         </div>
 
@@ -321,16 +235,8 @@
             </tbody>
           </table>
         </div>
-
-        <div class="figure-block">
-          <figure>
-            <img src="assets/figures/fig6_g1_outcomes.png" alt="Bar chart of G1 rollout outcomes across 4 pick-and-place tasks at w=1 vs w=6.">
-            <figcaption><strong>Figure 6.</strong> G1 rollout outcomes across all four tasks improve with CFG: red
-              ball (+15%), cup (+45%), bottle (+60%), medicine (+15%). The gain is driven almost entirely by
-              correcting wrong-task errors (41.3%&rarr;2.5%), while the missed-grasp rate is roughly unchanged &mdash;
-              CFG improves task disambiguation, not execution quality.</figcaption>
-          </figure>
-        </div>
+        <p class="exp-sub" style="margin-top:-6px;">CFG's gain comes almost entirely from correcting wrong-task
+          errors (41.3%&rarr;2.5%) &mdash; it improves task disambiguation, not execution quality.</p>
       </div>
 
       <!-- Bimanual -->
@@ -338,17 +244,11 @@
         <h3>Bimanual manipulation</h3>
         <p class="exp-sub">Two ALOHA-style arms on four contact-rich tasks, three requiring coordinated bimanual use.</p>
 
-        <div class="figure-row">
+        <div class="figure-block">
           <figure>
             <img src="assets/figures/fig7_setup.png" alt="Bimanual manipulation experimental setup with ALOHA-style arms and three cameras.">
-            <figcaption><strong>Figure 7.</strong> Bimanual setup: two ALOHA-style arms, one wrist camera per arm, and
-              one fixed workspace camera.</figcaption>
-          </figure>
-          <figure>
-            <img src="assets/figures/fig8_tasks.png" alt="Four bimanual manipulation evaluation tasks: sweeping a battery, placing a duck, inserting a cylinder, and placing a ball.">
-            <figcaption><strong>Figure 8.</strong> Evaluation tasks: (a) sweep a battery into a dust pan, (b) place a
-              rubber duck into a bin, (c) insert a cylinder into a hole, (d) place a red ball into a bin. 75
-              demonstrations per task via VR teleoperation.</figcaption>
+            <figcaption><strong>Figure 4.</strong> Bimanual setup: two ALOHA-style arms, one wrist camera per arm,
+              and one fixed workspace camera.</figcaption>
           </figure>
         </div>
 
@@ -368,26 +268,8 @@
             </tbody>
           </table>
         </div>
-
-        <div class="prose" style="margin-top:24px;">
-          <p>
-            A continuous flow-matching (CFM) baseline with the identical DiT backbone converges in training but fails
-            <em>all four tasks</em> at evaluation. Rollout inspection reveals severe high-frequency oscillation in the
-            commanded joint trajectories &mdash; peak joint jerk on the order of 10<sup>4</sup>&nbsp;rad/s<sup>3</sup>,
-            roughly two orders of magnitude worse than VQActFlow's ~2&times;10<sup>2</sup>&nbsp;rad/s<sup>3</sup>. We
-            attribute this to the VQ-VAE decoder mapping code sequences into action chunks through a learned
-            compositional vocabulary that encodes inter-code dependencies including trajectory smoothness &mdash; a
-            structural advantage continuous flow matching at the same backbone capacity does not have.
-          </p>
-        </div>
-
-        <div class="figure-block">
-          <figure>
-            <img src="assets/figures/fig9_smoothness.png" alt="Motion smoothness comparison between VQActFlow and continuous flow matching, showing joint jerk over time.">
-            <figcaption><strong>Figure 9.</strong> Commanded joint jerk over time: VQActFlow (blue) stays roughly two
-              orders of magnitude smoother than the CFM baseline (red) at matched backbone capacity.</figcaption>
-          </figure>
-        </div>
+        <p class="exp-sub" style="margin-top:-6px;">A continuous flow-matching baseline at the same backbone fails
+          all four tasks &mdash; severe joint-jerk oscillation, roughly two orders of magnitude worse than VQActFlow.</p>
 
         <div class="table-wrap">
           <table class="results">
@@ -400,34 +282,8 @@
             </tbody>
           </table>
         </div>
-        <p class="exp-sub" style="margin-top:-6px;">At 350 ms, the full configuration completes well within the
-          1.28 s spanned by each action chunk; asynchronous inference computes the next chunk during execution,
-          leaving margin for action-chunk smoothing without bottlenecking execution.</p>
-      </div>
-    </div>
-  </section>
-
-  <section id="conclusion">
-    <div class="container">
-      <div class="section-kicker">Conclusion</div>
-      <h2 class="section-title">A categorical interface for inference-time guidance</h2>
-      <div class="prose">
-        <p>
-          VQActFlow demonstrates that maintaining an explicit preference over discrete action modes during generation
-          provides a more effective interface for inference-time guidance than continuous-embedding alternatives. At
-          matched training conditions, the same CFG mechanism produces larger gains, peaks at lower guidance weights,
-          and reaches higher ceilings than baselines across LIBERO-Goal, LIBERO-90, and the G1 and bimanual tasks. The
-          contrastively-trained codebook critic operates through the same interface and supplies a feasibility signal
-          that CFG alone does not. VQActFlow deploys successfully on two distinct hardware platforms &mdash; a Unitree
-          G1 humanoid and an ALOHA-style bimanual system &mdash; executing contact-rich tasks where continuous flow
-          matching at matched capacity fails.
-        </p>
-        <p>
-          Two directions remain open: more expressive action tokenization schemes could relax the information-loss
-          floor imposed by the VQ-VAE bottleneck while preserving the categorical interface, and VFM could serve as
-          the action head of a VLA model, where the categorical output naturally interfaces with language-model token
-          vocabularies.
-        </p>
+        <p class="exp-sub" style="margin-top:-6px;">350 ms fits well within the 1.28 s per action chunk; asynchronous
+          inference computes the next chunk during execution.</p>
       </div>
     </div>
   </section>
