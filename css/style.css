@@ -227,6 +227,18 @@ section.alt {
   border: 0;
 }
 
+.video-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.video-placeholder span {
+  color: #aab4c8;
+  font-size: 1rem;
+  letter-spacing: 0.02em;
+}
+
 /* ---------- Figures ---------- */
 
 figure {
