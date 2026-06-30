@@ -100,7 +100,7 @@ document.addEventListener("DOMContentLoaded", function () {
             else video.pause();
           });
         },
-        { threshold: 0.25 }
+        { threshold: 0 }
       );
       io.observe(video);
     }

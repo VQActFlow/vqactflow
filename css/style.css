@@ -69,8 +69,9 @@ a:hover {
   height: 100%;
   object-fit: cover;
   z-index: 0;
-  transform: scale(1.06);
-  filter: blur(2px) saturate(1.05);
+  opacity: 0.3;
+  transform: scale(1.04);
+  filter: blur(1px) saturate(1.05);
   pointer-events: none;
 }
 
@@ -78,10 +79,7 @@ a:hover {
   position: absolute;
   inset: 0;
   z-index: 1;
-  background: linear-gradient(180deg,
-    rgba(247, 249, 252, 0.62) 0%,
-    rgba(249, 251, 253, 0.78) 52%,
-    rgba(255, 255, 255, 0.95) 100%);
+  background: rgba(255, 255, 255, 0.12);
   pointer-events: none;
 }
 
