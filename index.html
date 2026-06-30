@@ -4,10 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>VQActFlow: Vector-Quantized Action Mode Steering for Multi-Task Robot Manipulation</title>
-<meta name="description" content="VQActFlow tokenizes robot action chunks into a discrete VQ-VAE codebook and generates code sequences via Variational Flow Matching, maintaining an explicit preference over action modes that inference-time guidance (CFG + a learned codebook critic) can steer.">
+<meta name="description" content="VQActFlow turns robot action chunks into discrete VQ-VAE codes and generates them with Variational Flow Matching. Because it keeps a distribution over action modes at every step, inference-time guidance (CFG and a learned codebook critic) can steer which mode the policy commits to.">
 
 <meta property="og:title" content="VQActFlow: Vector-Quantized Action Mode Steering for Multi-Task Robot Manipulation">
-<meta property="og:description" content="A multi-task robot manipulation policy that maintains an explicit preference over discrete action modes throughout generation, enabling effective inference-time guidance.">
+<meta property="og:description" content="A multi-task robot manipulation policy that keeps a discrete distribution over action modes during generation, so guidance can steer it at inference time without retraining.">
 <meta property="og:type" content="website">
 <meta property="og:image" content="assets/figures/fig1_framework.png">
 
@@ -20,6 +20,11 @@
 <body>
 
 <header class="hero">
+  <video class="hero-bg" autoplay muted loop playsinline preload="auto"
+         poster="assets/videos/posters/bimanual_ball.jpg">
+    <source src="assets/videos/bimanual_ball.mp4" type="video/mp4">
+  </video>
+  <div class="hero-overlay"></div>
   <div class="container">
     <span class="venue-tag">Multi-Task Robot Manipulation &middot; Preprint 2026</span>
     <h1>VQActFlow: Vector-Quantized Action Mode Steering<br>for Multi-Task Robot Manipulation</h1>
@@ -52,11 +57,11 @@
     <div class="container">
       <div class="section-kicker">Abstract</div>
       <p class="lede">
-        Multi-task manipulation requires picking the right action mode for the task at hand &mdash; the wrong pick
-        means the wrong task. <strong>VQActFlow</strong> tokenizes action chunks into a discrete codebook and
-        generates code sequences with Variational Flow Matching, keeping an explicit, steerable preference over
-        action modes throughout generation. Classifier-free guidance and a learned codebook critic steer that
-        preference at inference time &mdash; no retraining needed.
+        In multi-task manipulation, a policy has to commit to the action mode that matches the current
+        instruction. Pick the wrong mode and the robot does the wrong task. <strong>VQActFlow</strong> tokenizes
+        action chunks into a discrete codebook and generates the codes with Variational Flow Matching, so it carries
+        a distribution over action modes through every step of generation. At inference time, classifier-free
+        guidance and a learned codebook critic reshape that distribution. Neither one retrains the policy.
       </p>
 
       <div class="stat-grid" style="margin-top:32px;">
@@ -66,15 +71,15 @@
         </div>
         <div class="stat-card">
           <span class="stat-value">80.5%</span>
-          <span class="stat-label">LIBERO-90 success with CFG + critic, best among all baselines</span>
+          <span class="stat-label">LIBERO-90 success with CFG and the critic, best of every baseline we ran</span>
         </div>
         <div class="stat-card">
           <span class="stat-value">57.5%</span>
-          <span class="stat-label">G1 humanoid success at w=6, up from 23.8% unguided</span>
+          <span class="stat-label">G1 humanoid success at w=6, up from 23.8% with no guidance</span>
         </div>
         <div class="stat-card">
           <span class="stat-value">77.5%</span>
-          <span class="stat-label">Bimanual avg. success with CFG + critic combined</span>
+          <span class="stat-label">Bimanual average success with CFG and the critic together</span>
         </div>
       </div>
     </div>
@@ -83,38 +88,40 @@
   <section id="method">
     <div class="container">
       <div class="section-kicker">Method</div>
-      <h2 class="section-title">Tokenize, generate, steer</h2>
+      <h2 class="section-title">How VQActFlow represents and steers actions</h2>
 
       <div class="figure-block">
         <figure>
           <img src="assets/figures/fig1_framework.png" alt="VQActFlow framework: VQ-VAE action tokenization followed by a Variational Flow Matching policy with CFG and codebook critic guidance.">
           <figcaption><strong>Figure 1.</strong> A VQ-VAE tokenizes action chunks into a discrete codebook. A
-            Variational Flow Matching policy generates code sequences while keeping logits over the full codebook at
-            every step &mdash; a categorical preference that CFG and a codebook critic can steer.</figcaption>
+            Variational Flow Matching policy then generates code sequences, keeping logits over the full codebook at
+            every step. CFG and a codebook critic act on those logits to steer the result.</figcaption>
         </figure>
       </div>
 
       <p class="lede">
-        Most flow-matching policies generate in a continuous space with no explicit notion of action mode, so
-        guidance just reshapes one continuous distribution. VQActFlow keeps a discrete, steerable preference over
-        action modes throughout generation, not just at the end of sampling.
+        Most flow-matching policies work in a continuous space with no explicit notion of action mode, so guidance
+        can only reshape a single continuous distribution. VQActFlow instead carries a discrete distribution over
+        action modes through generation, which gives guidance a categorical target to act on from the first step to
+        the last.
       </p>
 
       <ul class="contrib-list">
         <li>
           <span class="num">1</span>
-          <div><strong>CFG on language conditioning.</strong> Extrapolates conditional vs. unconditional logits at
-          every step to sharpen commitment to the instructed task.</div>
+          <div><strong>CFG on language conditioning.</strong> At every step it extrapolates between the conditional
+          and unconditional logits, which sharpens how firmly the policy commits to the instructed task.</div>
         </li>
         <li>
           <span class="num">2</span>
-          <div><strong>A learned codebook critic.</strong> A small contrastively-trained transformer scores
-          feasibility and nudges the distribution toward feasible modes.</div>
+          <div><strong>A learned codebook critic.</strong> A small transformer, trained contrastively, scores how
+          feasible each code is and pushes the distribution toward feasible modes.</div>
         </li>
       </ul>
 
       <p class="lede" style="margin-top:24px;">
-        Both act on the same categorical preference, so their effects accumulate and combine without retraining.
+        Both operate on the same categorical distribution, so you can apply them together, and neither one needs
+        extra training.
       </p>
     </div>
   </section>
@@ -122,22 +129,180 @@
   <section id="experiments" class="alt">
     <div class="container">
       <div class="section-kicker">Experiments</div>
-      <h2 class="section-title">LIBERO, a G1 humanoid, and an ALOHA-style bimanual platform</h2>
+      <h2 class="section-title">A G1 humanoid, a bimanual platform, and LIBERO in simulation</h2>
       <p class="lede">
-        VQActFlow outperforms continuous and discrete baselines across all three platforms, under matched encoders,
-        data, and training steps.
+        Across all three platforms, VQActFlow beats both continuous and discrete baselines trained on the same
+        encoder, data, and step budget.
       </p>
+
+      <!-- Humanoid -->
+      <div class="exp-block">
+        <h3>Humanoid whole-body manipulation</h3>
+        <p class="exp-sub">A Unitree G1 with two dexterous hands runs four pick-and-place tasks in one shared workspace; only the target object and the instruction change.</p>
+
+        <div class="figure-block">
+          <figure class="demo-gallery portrait">
+            <div class="demo-stage">
+              <video class="demo-video" autoplay muted loop playsinline preload="auto"
+                     poster="assets/videos/posters/g1_ball.jpg">
+                <source src="assets/videos/g1_ball.mp4" type="video/mp4">
+              </video>
+              <button class="demo-play" type="button" aria-label="Play video" hidden>&#9658;</button>
+            </div>
+            <div class="demo-meta">
+              <span class="demo-caption">Place the red ball into the box</span>
+              <span class="demo-chip success">Success</span>
+              <span class="demo-speed">&times;1.5</span>
+            </div>
+            <div class="demo-tabs" role="tablist" aria-label="G1 humanoid tasks">
+              <button class="demo-nav prev" type="button" aria-label="Previous task">&lsaquo;</button>
+              <button class="demo-tab active" type="button" role="tab" aria-selected="true"
+                      data-src="assets/videos/g1_ball.mp4" data-poster="assets/videos/posters/g1_ball.jpg"
+                      data-caption="Place the red ball into the box" data-outcome="success">Red ball</button>
+              <button class="demo-tab" type="button" role="tab" aria-selected="false"
+                      data-src="assets/videos/g1_cup.mp4" data-poster="assets/videos/posters/g1_cup.jpg"
+                      data-caption="Place the cup into the box" data-outcome="success">Cup</button>
+              <button class="demo-tab" type="button" role="tab" aria-selected="false"
+                      data-src="assets/videos/g1_bottle.mp4" data-poster="assets/videos/posters/g1_bottle.jpg"
+                      data-caption="Place the bottle into the box" data-outcome="success">Bottle</button>
+              <button class="demo-tab" type="button" role="tab" aria-selected="false"
+                      data-src="assets/videos/g1_medicine.mp4" data-poster="assets/videos/posters/g1_medicine.jpg"
+                      data-caption="Place the medicine bottle into the box" data-outcome="success">Medicine</button>
+              <button class="demo-nav next" type="button" aria-label="Next task">&rsaquo;</button>
+            </div>
+            <figcaption><strong>Figure 2.</strong> G1 humanoid whole-body pick-and-place. Pick a task to watch
+              VQActFlow run it.</figcaption>
+          </figure>
+        </div>
+
+        <div class="table-wrap">
+          <table class="results">
+            <caption><strong>Table I.</strong> Aggregated G1 hardware policy success rate (%).</caption>
+            <thead>
+              <tr><th>CFG weight</th><th>Success</th><th>Missed grasp</th><th>Wrong task</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>w=1</td><td>23.8</td><td>35.0</td><td>41.3</td></tr>
+              <tr class="highlight"><td>w=6</td><td>57.5</td><td>40.0</td><td>2.5</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="exp-sub" style="margin-top:-6px;">Almost all of CFG's gain here comes from fixing wrong-task errors,
+          which fall from 41.3% to 2.5%. It helps the policy choose the right task; it does not make the motion itself
+          any cleaner.</p>
+      </div>
+
+      <!-- Bimanual -->
+      <div class="exp-block">
+        <h3>Bimanual manipulation</h3>
+        <p class="exp-sub">Two ALOHA-style arms on four contact-rich tasks, three of them needing coordinated bimanual use.</p>
+
+        <div class="figure-block">
+          <figure class="demo-gallery landscape">
+            <div class="demo-stage">
+              <video class="demo-video" autoplay muted loop playsinline preload="auto"
+                     poster="assets/videos/posters/bimanual_sweep.jpg">
+                <source src="assets/videos/bimanual_sweep.mp4" type="video/mp4">
+              </video>
+              <button class="demo-play" type="button" aria-label="Play video" hidden>&#9658;</button>
+            </div>
+            <div class="demo-meta">
+              <span class="demo-caption">Sweep the battery into the dust pan</span>
+              <span class="demo-chip success">Success</span>
+              <span class="demo-speed">&times;1.5</span>
+            </div>
+            <div class="demo-tabs" role="tablist" aria-label="Bimanual tasks">
+              <button class="demo-nav prev" type="button" aria-label="Previous task">&lsaquo;</button>
+              <button class="demo-tab active" type="button" role="tab" aria-selected="true"
+                      data-src="assets/videos/bimanual_sweep.mp4" data-poster="assets/videos/posters/bimanual_sweep.jpg"
+                      data-caption="Sweep the battery into the dust pan" data-outcome="success">Battery</button>
+              <button class="demo-tab" type="button" role="tab" aria-selected="false"
+                      data-src="assets/videos/bimanual_duck.mp4" data-poster="assets/videos/posters/bimanual_duck.jpg"
+                      data-caption="Place the rubber duck into the white bin" data-outcome="success">Duck</button>
+              <button class="demo-tab" type="button" role="tab" aria-selected="false"
+                      data-src="assets/videos/bimanual_cylinder.mp4" data-poster="assets/videos/posters/bimanual_cylinder.jpg"
+                      data-caption="Insert the cylinder into the hole" data-outcome="success">Cylinder</button>
+              <button class="demo-tab" type="button" role="tab" aria-selected="false"
+                      data-src="assets/videos/bimanual_ball.mp4" data-poster="assets/videos/posters/bimanual_ball.jpg"
+                      data-caption="Place the red ball into the black bin" data-outcome="success">Ball</button>
+              <button class="demo-nav next" type="button" aria-label="Next task">&rsaquo;</button>
+            </div>
+            <figcaption><strong>Figure 3.</strong> The bimanual setup: two ALOHA-style arms, one wrist camera each, and
+              a fixed workspace camera. Pick a task to view a rollout.</figcaption>
+          </figure>
+        </div>
+
+        <div class="table-wrap">
+          <table class="results">
+            <caption><strong>Table II.</strong> Success rates (%) on bimanual manipulation tasks.</caption>
+            <thead>
+              <tr><th>Method</th><th>Battery</th><th>Duck</th><th>Cylinder</th><th>Ball</th><th>Avg.</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Discrete Policy, w=1.0</td><td>35.0</td><td>70.0</td><td>15.0</td><td>75.0</td><td>48.8</td></tr>
+              <tr><td>Discrete Policy, w=4.0</td><td>65.0</td><td>70.0</td><td>35.0</td><td>75.0</td><td>61.3</td></tr>
+              <tr><td>VQActFlow, w=1.0, &lambda;=0.0</td><td>40.0</td><td>70.0</td><td>15.0</td><td>55.0</td><td>45.0</td></tr>
+              <tr><td>VQActFlow, w=1.0, &lambda;=1.0</td><td>50.0</td><td>75.0</td><td>50.0</td><td>65.0</td><td>60.0</td></tr>
+              <tr><td>VQActFlow, w=4.0, &lambda;=0.0</td><td>70.0</td><td>85.0</td><td>55.0</td><td>85.0</td><td>73.8</td></tr>
+              <tr class="highlight"><td>VQActFlow, w=4.0, &lambda;=1.0</td><td>70.0</td><td>90.0</td><td>65.0</td><td>85.0</td><td>77.5</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="exp-sub" style="margin-top:-6px;">With the same backbone, a continuous flow-matching baseline fails
+          all four tasks. Its joints oscillate violently, roughly two orders of magnitude rougher than VQActFlow.</p>
+
+        <div class="figure-block">
+          <div class="compare-row">
+            <figure class="compare-item">
+              <div class="demo-stage">
+                <video class="demo-video" autoplay muted loop playsinline preload="auto"
+                       poster="assets/videos/posters/compare_vqflow.jpg">
+                  <source src="assets/videos/compare_vqflow.mp4" type="video/mp4">
+                </video>
+                <button class="demo-play" type="button" aria-label="Play video" hidden>&#9658;</button>
+              </div>
+              <figcaption><span class="demo-chip success">VQActFlow: success</span></figcaption>
+            </figure>
+            <figure class="compare-item">
+              <div class="demo-stage">
+                <video class="demo-video" autoplay muted loop playsinline preload="auto"
+                       poster="assets/videos/posters/compare_cfm.jpg">
+                  <source src="assets/videos/compare_cfm.mp4" type="video/mp4">
+                </video>
+                <button class="demo-play" type="button" aria-label="Play video" hidden>&#9658;</button>
+              </div>
+              <figcaption><span class="demo-chip failure">CFM baseline: failure</span></figcaption>
+            </figure>
+          </div>
+          <figcaption><strong>Figure 4.</strong> The same task and the same backbone, shown in real time. VQActFlow
+            completes the place; the continuous-flow CFM baseline oscillates and fails.</figcaption>
+        </div>
+
+        <div class="table-wrap">
+          <table class="results">
+            <caption><strong>Table III.</strong> Bimanual inference time per action chunk (ms), RTX 5090.</caption>
+            <thead>
+              <tr><th>Configuration</th><th>Unguided</th><th>CFG</th><th>Critic</th><th>CFG + critic</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Inference time</td><td>155.2</td><td>288.9</td><td>216.7</td><td>350.2</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="exp-sub" style="margin-top:-6px;">350 ms fits comfortably inside the 1.28 s budget per action chunk,
+          and asynchronous inference computes the next chunk while the current one runs.</p>
+      </div>
 
       <!-- LIBERO-Goal -->
       <div class="exp-block">
         <h3>CFG on LIBERO-Goal</h3>
-        <p class="exp-sub">Guidance through the categorical interface beats guidance through a continuous proxy.</p>
+        <p class="exp-sub">Guiding the discrete distribution directly works better than guiding a continuous approximation of it.</p>
 
         <div class="figure-block">
           <figure>
             <img src="assets/figures/fig2_cfg_sweep.png" alt="LIBERO-Goal success rate vs. CFG weight for VQActFlow and Discrete Policy.">
-            <figcaption><strong>Figure 2.</strong> Success rate vs. CFG weight. VQActFlow peaks at w=4 (81.0%);
-              Discrete Policy needs stronger guidance to reach a lower ceiling (61.5%).</figcaption>
+            <figcaption><strong>Figure 5.</strong> Success rate vs. CFG weight. VQActFlow peaks at w=4 (81.0%);
+              Discrete Policy needs stronger guidance and still tops out lower (61.5%).</figcaption>
           </figure>
         </div>
       </div>
@@ -145,11 +310,11 @@
       <!-- LIBERO-90 -->
       <div class="exp-block">
         <h3>Multi-task scaling on LIBERO-90</h3>
-        <p class="exp-sub">CFG and the codebook critic provide complementary, largely non-redundant gains at scale.</p>
+        <p class="exp-sub">At this scale, CFG and the codebook critic each contribute their own gains, and the gains mostly stack.</p>
 
         <div class="table-wrap">
           <table class="results">
-            <caption><strong>Table I.</strong> LIBERO-90 success rate (%) for different policies, trained from scratch under matched conditions.</caption>
+            <caption><strong>Table IV.</strong> LIBERO-90 success rate (%) for different policies, trained from scratch under matched conditions.</caption>
             <thead>
               <tr><th>Method</th><th>Type</th><th>CFG w</th><th>Critic &lambda;</th><th>Success</th></tr>
             </thead>
@@ -169,7 +334,7 @@
 
         <div class="table-wrap">
           <table class="results">
-            <caption><strong>Table II.</strong> Ablation on codebook size K, LIBERO-90, guidance disabled.</caption>
+            <caption><strong>Table V.</strong> Ablation on codebook size K, LIBERO-90, guidance disabled.</caption>
             <thead>
               <tr><th>Codebook size</th><th>128</th><th>256</th><th>512</th><th>1024</th></tr>
             </thead>
@@ -178,85 +343,9 @@
             </tbody>
           </table>
         </div>
-        <p class="exp-sub" style="margin-top:-6px;">Success peaks at K=512: smaller codebooks limit vocabulary
-          granularity, larger ones enlarge the per-position classification space and make the categorical prediction
-          harder to learn.</p>
-      </div>
-
-      <!-- Humanoid -->
-      <div class="exp-block">
-        <h3>Humanoid whole-body manipulation</h3>
-        <p class="exp-sub">A Unitree G1 with two dexterous hands, four shared-workspace pick-and-place tasks differing only in target object and instruction.</p>
-
-        <div class="figure-block">
-          <figure>
-            <img src="assets/figures/fig5_humanoid.png" alt="Unitree G1 humanoid experimental setup and four pick-and-place evaluation tasks.">
-            <figcaption><strong>Figure 3.</strong> G1 humanoid setup and tasks: place the red ball / cup / bottle /
-              medicine bottle into the box.</figcaption>
-          </figure>
-        </div>
-
-        <div class="table-wrap">
-          <table class="results">
-            <caption><strong>Table III.</strong> Aggregated G1 hardware policy success rate (%).</caption>
-            <thead>
-              <tr><th>CFG weight</th><th>Success</th><th>Missed grasp</th><th>Wrong task</th></tr>
-            </thead>
-            <tbody>
-              <tr><td>w=1</td><td>23.8</td><td>35.0</td><td>41.3</td></tr>
-              <tr class="highlight"><td>w=6</td><td>57.5</td><td>40.0</td><td>2.5</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <p class="exp-sub" style="margin-top:-6px;">CFG's gain comes almost entirely from correcting wrong-task
-          errors (41.3%&rarr;2.5%) &mdash; it improves task disambiguation, not execution quality.</p>
-      </div>
-
-      <!-- Bimanual -->
-      <div class="exp-block">
-        <h3>Bimanual manipulation</h3>
-        <p class="exp-sub">Two ALOHA-style arms on four contact-rich tasks, three requiring coordinated bimanual use.</p>
-
-        <div class="figure-block">
-          <figure>
-            <img src="assets/figures/fig7_setup.png" alt="Bimanual manipulation experimental setup with ALOHA-style arms and three cameras.">
-            <figcaption><strong>Figure 4.</strong> Bimanual setup: two ALOHA-style arms, one wrist camera per arm,
-              and one fixed workspace camera.</figcaption>
-          </figure>
-        </div>
-
-        <div class="table-wrap">
-          <table class="results">
-            <caption><strong>Table IV.</strong> Success rates (%) on bimanual manipulation tasks.</caption>
-            <thead>
-              <tr><th>Method</th><th>Battery</th><th>Duck</th><th>Cylinder</th><th>Ball</th><th>Avg.</th></tr>
-            </thead>
-            <tbody>
-              <tr><td>Discrete Policy, w=1.0</td><td>35.0</td><td>70.0</td><td>15.0</td><td>75.0</td><td>48.8</td></tr>
-              <tr><td>Discrete Policy, w=4.0</td><td>65.0</td><td>70.0</td><td>35.0</td><td>75.0</td><td>61.3</td></tr>
-              <tr><td>VQActFlow, w=1.0, &lambda;=0.0</td><td>40.0</td><td>70.0</td><td>15.0</td><td>55.0</td><td>45.0</td></tr>
-              <tr><td>VQActFlow, w=1.0, &lambda;=1.0</td><td>50.0</td><td>75.0</td><td>50.0</td><td>65.0</td><td>60.0</td></tr>
-              <tr><td>VQActFlow, w=4.0, &lambda;=0.0</td><td>70.0</td><td>85.0</td><td>55.0</td><td>85.0</td><td>73.8</td></tr>
-              <tr class="highlight"><td>VQActFlow, w=4.0, &lambda;=1.0</td><td>70.0</td><td>90.0</td><td>65.0</td><td>85.0</td><td>77.5</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <p class="exp-sub" style="margin-top:-6px;">A continuous flow-matching baseline at the same backbone fails
-          all four tasks &mdash; severe joint-jerk oscillation, roughly two orders of magnitude worse than VQActFlow.</p>
-
-        <div class="table-wrap">
-          <table class="results">
-            <caption><strong>Table V.</strong> Bimanual inference time per action chunk (ms), RTX 5090.</caption>
-            <thead>
-              <tr><th>Configuration</th><th>Unguided</th><th>CFG</th><th>Critic</th><th>CFG + critic</th></tr>
-            </thead>
-            <tbody>
-              <tr><td>Inference time</td><td>155.2</td><td>288.9</td><td>216.7</td><td>350.2</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <p class="exp-sub" style="margin-top:-6px;">350 ms fits well within the 1.28 s per action chunk; asynchronous
-          inference computes the next chunk during execution.</p>
+        <p class="exp-sub" style="margin-top:-6px;">Success peaks at K=512. Smaller codebooks limit how finely actions
+          can be quantized; larger ones blow up the per-position classification space and make the categorical
+          prediction harder to learn.</p>
       </div>
     </div>
   </section>
@@ -281,7 +370,7 @@
 
 <footer>
   <div class="container">
-    <p>Anonymous project page &mdash; prepared for double-blind review.</p>
+    <p>Anonymous project page, prepared for double-blind review.</p>
     <p>Project page built from the VQActFlow manuscript.</p>
   </div>
 </footer>

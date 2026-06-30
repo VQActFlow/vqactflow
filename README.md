@@ -12,10 +12,16 @@ from the paper, with the original figures and a BibTeX citation block.
 ```
 index.html            page content
 css/style.css          styling
-js/main.js              "copy BibTeX" button behavior
-assets/figures/         figures extracted from the paper
-.nojekyll               tells GitHub Pages to skip Jekyll processing
+js/main.js             copy-BibTeX button + experiment-video galleries
+assets/figures/        framework diagram and result charts
+assets/videos/         experiment demo clips (G1, bimanual, comparison)
+assets/videos/posters/ poster frames / reduced-motion fallbacks
+.nojekyll              tells GitHub Pages to skip Jekyll processing
 ```
+
+The G1 humanoid and bimanual experiment sections use interactive video galleries
+(pick a task to watch a rollout) instead of static setup photos. Clips are muted,
+looping, autoplaying H.264 with their metadata stripped.
 
 This is a plain static site — no build step, no dependencies.
 
