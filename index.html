@@ -232,6 +232,45 @@
           </figure>
         </div>
 
+        <div class="figure-block">
+          <figure class="demo-gallery landscape">
+            <div class="demo-stage">
+              <video class="demo-video" autoplay muted loop playsinline preload="auto"
+                     poster="assets/videos/posters/bimanual_fail_ball_12.jpg">
+                <source src="assets/videos/bimanual_fail_ball_12.mp4" type="video/mp4">
+              </video>
+              <button class="demo-play" type="button" aria-label="Play video" hidden>&#9658;</button>
+            </div>
+            <div class="demo-meta">
+              <span class="demo-caption">Place the red ball into the black bin: puts the duck in the white bin instead</span>
+              <span class="demo-chip failure">Failure</span>
+              <span class="demo-speed">&times;1.5</span>
+            </div>
+            <div class="demo-tabs" role="tablist" aria-label="Bimanual failure cases">
+              <button class="demo-nav prev" type="button" aria-label="Previous case">&lsaquo;</button>
+              <button class="demo-tab active" type="button" role="tab" aria-selected="true"
+                      data-src="assets/videos/bimanual_fail_ball_12.mp4" data-poster="assets/videos/posters/bimanual_fail_ball_12.jpg"
+                      data-caption="Place the red ball into the black bin: puts the duck in the white bin instead" data-outcome="failure">Ball 1</button>
+              <button class="demo-tab" type="button" role="tab" aria-selected="false"
+                      data-src="assets/videos/bimanual_fail_ball_13.mp4" data-poster="assets/videos/posters/bimanual_fail_ball_13.jpg"
+                      data-caption="Place the red ball into the black bin: grabs the duck and starts a handover" data-outcome="failure">Ball 2</button>
+              <button class="demo-tab" type="button" role="tab" aria-selected="false"
+                      data-src="assets/videos/bimanual_fail_ball_14.mp4" data-poster="assets/videos/posters/bimanual_fail_ball_14.jpg"
+                      data-caption="Place the red ball into the black bin: keeps reaching toward the duck and cylinder" data-outcome="failure">Ball 3</button>
+              <button class="demo-tab" type="button" role="tab" aria-selected="false"
+                      data-src="assets/videos/bimanual_fail_ball_17.mp4" data-poster="assets/videos/posters/bimanual_fail_ball_17.jpg"
+                      data-caption="Place the red ball into the black bin: the same back-and-forth, in a shorter run" data-outcome="failure">Ball 4</button>
+              <button class="demo-tab" type="button" role="tab" aria-selected="false"
+                      data-src="assets/videos/bimanual_fail_cylinder_16.mp4" data-poster="assets/videos/posters/bimanual_fail_cylinder_16.jpg"
+                      data-caption="Insert the cylinder into the hole: starts a two-arm handover instead" data-outcome="failure">Cylinder</button>
+              <button class="demo-nav next" type="button" aria-label="Next case">&rsaquo;</button>
+            </div>
+            <figcaption><strong>Figure 4.</strong> For contrast, failed rollouts of the unguided policy (w=1,
+              &lambda;=0), recorded by the workspace camera. In each, the policy starts, or drifts toward, a motion
+              that belongs to a different task. These mode errors are what guidance targets (Table II).</figcaption>
+          </figure>
+        </div>
+
         <div class="table-wrap">
           <table class="results">
             <caption><strong>Table II.</strong> Success rates (%) on bimanual manipulation tasks.</caption>
@@ -274,7 +313,7 @@
               <figcaption><span class="demo-chip failure">CFM baseline: failure</span></figcaption>
             </figure>
           </div>
-          <figcaption><strong>Figure 4.</strong> The same task and the same backbone, shown in real time. VQActFlow
+          <figcaption><strong>Figure 5.</strong> The same task and the same backbone, shown in real time. VQActFlow
             completes the place; the continuous-flow CFM baseline oscillates and fails.</figcaption>
         </div>
 
@@ -301,7 +340,7 @@
         <div class="figure-block">
           <figure>
             <img src="assets/figures/fig2_cfg_sweep.png" alt="LIBERO-Goal success rate vs. CFG weight for VQActFlow and Discrete Policy.">
-            <figcaption><strong>Figure 5.</strong> Success rate vs. CFG weight. VQActFlow peaks at w=4 (81.0%);
+            <figcaption><strong>Figure 6.</strong> Success rate vs. CFG weight. VQActFlow peaks at w=4 (81.0%);
               Discrete Policy needs stronger guidance and still tops out lower (61.5%).</figcaption>
           </figure>
         </div>
