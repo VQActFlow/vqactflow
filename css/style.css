@@ -114,16 +114,22 @@ a:hover {
   isolation: isolate;
 }
 
+/* The banner clip is 1280x720: never wider than that, with its sides faded out
+   so wide screens show no hard edge. */
 .hero-bg {
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 50%;
   width: 100%;
+  max-width: 1280px;
   height: 100%;
+  transform: translateX(-50%);
   object-fit: cover;
   z-index: 0;
   opacity: 0.3;
-  transform: scale(1.04);
   filter: blur(1px) grayscale(0.2);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 12%, #000 88%, transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0, #000 12%, #000 88%, transparent 100%);
   pointer-events: none;
 }
 
@@ -272,6 +278,7 @@ figure {
 
 figure img {
   max-width: 100%;
+  height: auto;
 }
 
 figcaption {
@@ -455,7 +462,7 @@ figcaption {
 /* Comparison 2-up */
 .compare-row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 20px;
   max-width: var(--measure);
   margin: 0 auto;
@@ -469,8 +476,15 @@ figcaption {
   margin-top: 8px;
 }
 
+.compare-item .demo-chip { white-space: normal; }
+
+/* Portrait clips (608x1080) stay side by side, at well under native size. */
+.compare-row.portrait { max-width: 540px; }
+.compare-row.portrait .compare-item .demo-stage { aspect-ratio: 608 / 1080; }
+
 @media (max-width: 760px) {
   .compare-row { grid-template-columns: 1fr; gap: 24px; }
+  .compare-row.portrait { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
 }
 
 /* ---------- Contributions list ---------- */
@@ -540,24 +554,28 @@ figcaption {
 
 /* ---------- Tables (booktabs rules) ---------- */
 
+/* Tables take the width of their content; the caption sits above, spans the text
+   width, and only the table itself scrolls on narrow screens. */
 .table-wrap {
-  overflow-x: auto;
   margin: 0 auto 14px;
   max-width: var(--measure);
 }
 
+.table-wrap > figcaption {
+  margin: 0 auto 8px;
+  text-align: justify;
+  text-align-last: center;
+}
+
+.table-scroll {
+  overflow-x: auto;
+}
+
 table.results {
   border-collapse: collapse;
-  width: 100%;
   margin: 0 auto;
   font-size: 0.9rem;
   line-height: 1.35;
-}
-
-table.results caption {
-  font-size: 0.88rem;
-  margin-bottom: 8px;
-  caption-side: top;
 }
 
 table.results th,
@@ -585,6 +603,15 @@ table.results tr.highlight td {
   font-weight: 600;
 }
 
+table.results.ablation td:nth-child(2) { white-space: nowrap; }
+
+table.results tr.group td {
+  font-style: italic;
+  text-align: left;
+  padding-top: 7px;
+  border-top: 0.8px solid var(--color-rule);
+}
+
 /* ---------- Sub-experiment blocks ---------- */
 
 .exp-block {
@@ -608,8 +635,9 @@ table.results tr.highlight td {
   margin: 0 auto 24px;
 }
 
-/* Notes that follow a table read as body text. */
-.table-wrap + .exp-sub {
+/* Notes that follow a table, and other longer notes, read as body text. */
+.table-wrap + .exp-sub,
+.exp-sub.note {
   text-align: justify;
   hyphens: auto;
   -webkit-hyphens: auto;
@@ -720,11 +748,13 @@ footer a {
   .prose,
   figcaption,
   .contrib-list li,
-  .table-wrap + .exp-sub { text-align: left; }
+  .table-wrap + .exp-sub,
+  .exp-sub.note { text-align: left; }
+  .table-wrap > figcaption { text-align: left; text-align-last: auto; }
 
   .hero h1 { font-size: 1.6rem; }
   .demo-nav { display: none; }
-  table.results { font-size: 0.85rem; }
+  table.results { font-size: 0.8rem; }
   table.results th,
-  table.results td { padding: 4px 6px; }
+  table.results td { padding: 4px 5px; }
 }

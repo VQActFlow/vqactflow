@@ -5,7 +5,10 @@ Multi-Task Robot Manipulation**
 
 The page presents the abstract, method, contributions, and experimental
 results (LIBERO-Goal, LIBERO-90, Unitree G1 humanoid, ALOHA-style bimanual)
-from the paper, with the original figures and a BibTeX citation block.
+from the paper, with the original figures and a BibTeX citation block. It also
+carries supporting analyses that did not fit in the paper: training-seed
+robustness, guidance-weight and critic-weight sensitivity, task-ID vs. language
+conditioning, and what the codebook critic learns.
 
 ## Structure
 
@@ -15,7 +18,7 @@ css/style.css          styling (paper-like: Source Serif 4, booktabs-style table
 js/main.js             copy-BibTeX button + experiment-video galleries
 assets/figures/        framework diagram and result charts
 assets/fonts/          Source Serif 4, self-hosted WOFF2, SIL OFL
-assets/videos/         experiment demo clips (G1, bimanual successes and failures, comparison)
+assets/videos/         experiment demo clips (G1 and bimanual rollouts, failure cases, CFM comparisons)
 assets/videos/posters/ poster frames / reduced-motion fallbacks
 .nojekyll              tells GitHub Pages to skip Jekyll processing
 ```

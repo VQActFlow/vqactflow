@@ -12,7 +12,7 @@
 <meta property="og:image" content="assets/figures/fig1_framework.png">
 
 <link rel="preload" href="assets/fonts/source-serif-4-latin-opsz-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="css/style.css?v=5">
+<link rel="stylesheet" href="css/style.css?v=6">
 </head>
 <body>
 
@@ -67,15 +67,15 @@
           <span class="stat-label">LIBERO-Goal peak success (w=4), vs. 61.5% for the closest discrete baseline</span>
         </div>
         <div class="stat-card">
-          <span class="stat-value">80.5%</span>
-          <span class="stat-label">LIBERO-90 success with CFG and the critic, best of every baseline we ran</span>
+          <span class="stat-value">79.3%</span>
+          <span class="stat-label">LIBERO-90 success with CFG and the critic, above every VQ-based baseline</span>
         </div>
         <div class="stat-card">
           <span class="stat-value">57.5%</span>
           <span class="stat-label">G1 humanoid success at w=6, up from 23.8% with no guidance</span>
         </div>
         <div class="stat-card">
-          <span class="stat-value">77.5%</span>
+          <span class="stat-value">82.5%</span>
           <span class="stat-label">Bimanual average success with CFG and the critic together</span>
         </div>
       </div>
@@ -89,7 +89,7 @@
 
       <div class="figure-block">
         <figure>
-          <img src="assets/figures/fig1_framework.png" alt="VQActFlow framework: VQ-VAE action tokenization followed by a Variational Flow Matching policy with CFG and codebook critic guidance.">
+          <img src="assets/figures/fig1_framework.png" width="1032" height="303" alt="VQActFlow framework: VQ-VAE action tokenization followed by a Variational Flow Matching policy with CFG and codebook critic guidance.">
           <figcaption><strong>Figure 1.</strong> A VQ-VAE tokenizes action chunks into a discrete codebook. A
             Variational Flow Matching policy then generates code sequences, keeping logits over the full codebook at
             every step. CFG and a codebook critic act on those logits to steer the result.</figcaption>
@@ -172,21 +172,55 @@
           </figure>
         </div>
 
-        <div class="table-wrap">
-          <table class="results">
-            <caption><strong>Table I.</strong> Aggregated G1 hardware policy success rate (%).</caption>
-            <thead>
-              <tr><th>CFG weight</th><th>Success</th><th>Missed grasp</th><th>Wrong task</th></tr>
-            </thead>
-            <tbody>
-              <tr><td>w=1</td><td>23.8</td><td>35.0</td><td>41.3</td></tr>
-              <tr class="highlight"><td>w=6</td><td>57.5</td><td>40.0</td><td>2.5</td></tr>
-            </tbody>
-          </table>
-        </div>
+        <figure class="table-wrap">
+          <figcaption><strong>Table I.</strong> Aggregated G1 hardware policy success rate (%).</figcaption>
+          <div class="table-scroll">
+            <table class="results">
+              <thead>
+                <tr><th>CFG weight</th><th>Success</th><th>Missed grasp</th><th>Wrong task</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>w=1</td><td>23.8</td><td>35.0</td><td>41.3</td></tr>
+                <tr class="highlight"><td>w=6</td><td>57.5</td><td>40.0</td><td>2.5</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </figure>
         <p class="exp-sub" style="margin-top:-6px;">Almost all of CFG's gain here comes from fixing wrong-task errors,
           which fall from 41.3% to 2.5%. It helps the policy choose the right task; it does not make the motion itself
           any cleaner.</p>
+        <p class="exp-sub note">A CFM policy trained the same way (same DiT backbone, data, and training protocol)
+          converges in training but oscillates in every G1 rollout and never completes a grasp, with or without CFG.
+          The oscillation shakes the robot's torso, so we stopped its evaluation early for safety and count its success
+          rate as 0%.</p>
+
+        <div class="figure-block">
+          <div class="compare-row portrait">
+            <figure class="compare-item">
+              <div class="demo-stage">
+                <video class="demo-video" autoplay muted loop playsinline preload="auto"
+                       poster="assets/videos/posters/g1_compare_vqflow.jpg">
+                  <source src="assets/videos/g1_compare_vqflow.mp4" type="video/mp4">
+                </video>
+                <button class="demo-play" type="button" aria-label="Play video" hidden>&#9658;</button>
+              </div>
+              <figcaption><span class="demo-chip success">VQActFlow: success</span></figcaption>
+            </figure>
+            <figure class="compare-item">
+              <div class="demo-stage">
+                <video class="demo-video" autoplay muted loop playsinline preload="auto"
+                       poster="assets/videos/posters/g1_compare_cfm.jpg">
+                  <source src="assets/videos/g1_compare_cfm.mp4" type="video/mp4">
+                </video>
+                <button class="demo-play" type="button" aria-label="Play video" hidden>&#9658;</button>
+              </div>
+              <figcaption><span class="demo-chip failure">CFM baseline: unstable</span></figcaption>
+            </figure>
+          </div>
+          <figcaption><strong>Figure 3.</strong> VQActFlow and the CFM baseline on the G1, shown in real time.
+            VQActFlow places the red ball in the box. Under CFM an arm suddenly lunges toward the table; we ran it only
+            briefly to avoid damaging the hardware.</figcaption>
+        </div>
       </div>
 
       <!-- Bimanual -->
@@ -224,7 +258,7 @@
                       data-caption="Place the red ball into the black bin" data-outcome="success">Ball</button>
               <button class="demo-nav next" type="button" aria-label="Next task">&rsaquo;</button>
             </div>
-            <figcaption><strong>Figure 3.</strong> The bimanual setup: two ALOHA-style arms, one wrist camera each, and
+            <figcaption><strong>Figure 4.</strong> The bimanual setup: two ALOHA-style arms, one wrist camera each, and
               a fixed workspace camera. Pick a task to view a rollout.</figcaption>
           </figure>
         </div>
@@ -262,30 +296,39 @@
                       data-caption="Insert the cylinder into the hole: starts a two-arm handover instead" data-outcome="failure">Cylinder</button>
               <button class="demo-nav next" type="button" aria-label="Next case">&rsaquo;</button>
             </div>
-            <figcaption><strong>Figure 4.</strong> For contrast, failed rollouts with weak guidance (w=1,
+            <figcaption><strong>Figure 5.</strong> For contrast, failed rollouts with weak guidance (w=1,
               &lambda;=0), recorded by the workspace camera. In each, the policy starts, or drifts toward, a motion
               that belongs to a different task. These failures are due to the weak guidance: raising it to w=4,
-              &lambda;=1 lifts average success from 45.0% to 77.5% (Table II).</figcaption>
+              &lambda;=1 lifts average success from 67.0% to 82.5% (Table II).</figcaption>
           </figure>
         </div>
 
-        <div class="table-wrap">
-          <table class="results">
-            <caption><strong>Table II.</strong> Success rates (%) on bimanual manipulation tasks.</caption>
-            <thead>
-              <tr><th>Method</th><th>Battery</th><th>Duck</th><th>Cylinder</th><th>Ball</th><th>Avg.</th></tr>
-            </thead>
-            <tbody>
-              <tr><td>Discrete Policy, w=1.0</td><td>35.0</td><td>70.0</td><td>15.0</td><td>75.0</td><td>48.8</td></tr>
-              <tr><td>Discrete Policy, w=4.0</td><td>65.0</td><td>70.0</td><td>35.0</td><td>75.0</td><td>61.3</td></tr>
-              <tr><td>VQActFlow, w=1.0, &lambda;=0.0</td><td>40.0</td><td>70.0</td><td>15.0</td><td>55.0</td><td>45.0</td></tr>
-              <tr><td>VQActFlow, w=1.0, &lambda;=1.0</td><td>50.0</td><td>75.0</td><td>50.0</td><td>65.0</td><td>60.0</td></tr>
-              <tr><td>VQActFlow, w=4.0, &lambda;=0.0</td><td>70.0</td><td>85.0</td><td>55.0</td><td>85.0</td><td>73.8</td></tr>
-              <tr class="highlight"><td>VQActFlow, w=4.0, &lambda;=1.0</td><td>70.0</td><td>90.0</td><td>65.0</td><td>85.0</td><td>77.5</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <p class="exp-sub" style="margin-top:-6px;">With the same backbone, a continuous flow-matching baseline fails
+        <figure class="table-wrap">
+          <figcaption><strong>Table II.</strong> Success rates (%) on bimanual manipulation tasks, mean &plusmn; std over 5 evaluation sessions of 20 trials per task.</figcaption>
+          <div class="table-scroll">
+            <table class="results">
+              <thead>
+                <tr><th>Method</th><th>w</th><th>&lambda;</th><th>Battery</th><th>Duck</th><th>Cylinder</th><th>Ball</th><th>Avg.</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Discrete Policy</td><td>1</td><td>&ndash;</td><td>53&plusmn;7.6</td><td>54&plusmn;8.9</td><td>68&plusmn;4.5</td><td>68&plusmn;4.5</td><td>60.8&plusmn;5.0</td></tr>
+                <tr><td>Discrete Policy</td><td>4</td><td>&ndash;</td><td>64&plusmn;5.5</td><td>71&plusmn;5.5</td><td>78&plusmn;4.5</td><td>70&plusmn;10.0</td><td>70.8&plusmn;2.9</td></tr>
+                <tr><td>VQActFlow</td><td>1</td><td>0</td><td>60&plusmn;7.9</td><td>76&plusmn;5.5</td><td>77&plusmn;7.6</td><td>55&plusmn;11.2</td><td>67.0&plusmn;4.9</td></tr>
+                <tr><td>VQActFlow</td><td>1</td><td>1</td><td>67&plusmn;2.7</td><td>77&plusmn;4.5</td><td>84&plusmn;9.6</td><td>63&plusmn;11.0</td><td>72.8&plusmn;2.7</td></tr>
+                <tr><td>VQActFlow</td><td>4</td><td>0</td><td>74&plusmn;4.2</td><td>80&plusmn;3.5</td><td>85&plusmn;7.9</td><td>75&plusmn;15.4</td><td>78.5&plusmn;4.5</td></tr>
+                <tr class="highlight"><td>VQActFlow</td><td>4</td><td>1</td><td>76&plusmn;4.2</td><td>85&plusmn;5.0</td><td>90&plusmn;6.1</td><td>79&plusmn;6.5</td><td>82.5&plusmn;3.0</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </figure>
+        <p class="exp-sub" style="margin-top:-6px;">Each row is 400 real-robot rollouts, run in five sessions on
+          different days. With CFG and the critic, VQActFlow beats Discrete Policy at the same weight by 11.7 points
+          (95% CI [7.4, 16.0], p&nbsp;&lt;&nbsp;0.001). The critic raises success on every task at both weights (8 of 8
+          comparisons, sign test p&nbsp;=&nbsp;0.008), though neither average gain is significant on its own at this
+          number of trials. Ball varies most between sessions because the red ball is sensitive to lighting. These
+          results use a revised gripper: after the change we re-collected about 100 demonstrations per task and
+          retrained every policy.</p>
+        <p class="exp-sub note">With the same backbone, a continuous flow-matching baseline fails
           all four tasks. Its joints oscillate violently, roughly two orders of magnitude rougher than VQActFlow.</p>
 
         <div class="figure-block">
@@ -311,21 +354,24 @@
               <figcaption><span class="demo-chip failure">CFM baseline: failure</span></figcaption>
             </figure>
           </div>
-          <figcaption><strong>Figure 5.</strong> The same task and the same backbone, shown in real time. VQActFlow
-            completes the place; the continuous-flow CFM baseline oscillates and fails.</figcaption>
+          <figcaption><strong>Figure 6.</strong> The same task and the same backbone, shown in real time. VQActFlow
+            completes the place; the continuous-flow CFM baseline oscillates and fails. Recorded with the earlier
+            gripper.</figcaption>
         </div>
 
-        <div class="table-wrap">
-          <table class="results">
-            <caption><strong>Table III.</strong> Bimanual inference time per action chunk (ms), RTX 5090.</caption>
-            <thead>
-              <tr><th>Configuration</th><th>Unguided</th><th>CFG</th><th>Critic</th><th>CFG + critic</th></tr>
-            </thead>
-            <tbody>
-              <tr><td>Inference time</td><td>155.2</td><td>288.9</td><td>216.7</td><td>350.2</td></tr>
-            </tbody>
-          </table>
-        </div>
+        <figure class="table-wrap">
+          <figcaption><strong>Table III.</strong> Bimanual inference time per action chunk (ms), RTX 5090.</figcaption>
+          <div class="table-scroll">
+            <table class="results">
+              <thead>
+                <tr><th>Configuration</th><th>Unguided</th><th>CFG</th><th>Critic</th><th>CFG + critic</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Inference time</td><td>155.2</td><td>288.9</td><td>216.7</td><td>350.2</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </figure>
         <p class="exp-sub" style="margin-top:-6px;">350 ms fits comfortably inside the 1.28 s budget per action chunk,
           and asynchronous inference computes the next chunk while the current one runs.</p>
       </div>
@@ -337,8 +383,8 @@
 
         <div class="figure-block">
           <figure>
-            <img src="assets/figures/fig2_cfg_sweep.png" alt="LIBERO-Goal success rate vs. CFG weight for VQActFlow and Discrete Policy.">
-            <figcaption><strong>Figure 6.</strong> Success rate vs. CFG weight. VQActFlow peaks at w=4 (81.0%);
+            <img src="assets/figures/fig2_cfg_sweep.png" width="630" height="434" alt="LIBERO-Goal success rate vs. CFG weight for VQActFlow and Discrete Policy.">
+            <figcaption><strong>Figure 7.</strong> Success rate vs. CFG weight. VQActFlow peaks at w=4 (81.0%);
               Discrete Policy needs stronger guidance and still tops out lower (61.5%).</figcaption>
           </figure>
         </div>
@@ -349,40 +395,193 @@
         <h3>Multi-task scaling on LIBERO-90</h3>
         <p class="exp-sub">At this scale, CFG and the codebook critic each contribute their own gains, and the gains mostly stack.</p>
 
-        <div class="table-wrap">
-          <table class="results">
-            <caption><strong>Table IV.</strong> LIBERO-90 success rate (%) for different policies, trained from scratch under matched conditions.</caption>
-            <thead>
-              <tr><th>Method</th><th>Type</th><th>CFG w</th><th>Critic &lambda;</th><th>Success</th></tr>
-            </thead>
-            <tbody>
-              <tr><td>MT-ACT</td><td>Continuous</td><td>&ndash;</td><td>&ndash;</td><td>72.4</td></tr>
-              <tr><td>CFM</td><td>Continuous</td><td>&ndash;</td><td>&ndash;</td><td>77.2</td></tr>
-              <tr><td>VQ-BeT</td><td>VQ-based</td><td>&ndash;</td><td>&ndash;</td><td>24.1</td></tr>
-              <tr><td>Discrete Policy</td><td>VQ-based</td><td>1.0</td><td>&ndash;</td><td>49.4</td></tr>
-              <tr><td>Discrete Policy</td><td>VQ-based</td><td>2.0</td><td>&ndash;</td><td>60.3</td></tr>
-              <tr><td>VQActFlow</td><td>VQ-based</td><td>1.0</td><td>0.0</td><td>72.3</td></tr>
-              <tr><td>VQActFlow</td><td>VQ-based</td><td>1.0</td><td>1.0</td><td>74.3</td></tr>
-              <tr><td>VQActFlow</td><td>VQ-based</td><td>2.0</td><td>0.0</td><td>77.6</td></tr>
-              <tr class="highlight"><td>VQActFlow</td><td>VQ-based</td><td>2.0</td><td>1.0</td><td>80.5</td></tr>
-            </tbody>
-          </table>
-        </div>
+        <figure class="table-wrap">
+          <figcaption><strong>Table IV.</strong> LIBERO-90 success rate (%) for different policies, trained from scratch under matched conditions. Mean &plusmn; std over 5 evaluation seeds.</figcaption>
+          <div class="table-scroll">
+            <table class="results">
+              <thead>
+                <tr><th>Method</th><th>Type</th><th>CFG w</th><th>Critic &lambda;</th><th>Success</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>MT-ACT</td><td>Continuous</td><td>&ndash;</td><td>&ndash;</td><td>72.2&plusmn;0.2</td></tr>
+                <tr><td>CFM</td><td>Continuous</td><td>&ndash;</td><td>&ndash;</td><td>76.2&plusmn;1.2</td></tr>
+                <tr><td>CFM</td><td>Continuous</td><td>2.0</td><td>&ndash;</td><td>78.3&plusmn;0.9</td></tr>
+                <tr><td>VQ-BeT</td><td>VQ-based</td><td>&ndash;</td><td>&ndash;</td><td>23.0&plusmn;1.3</td></tr>
+                <tr><td>Discrete Policy</td><td>VQ-based</td><td>1.0</td><td>&ndash;</td><td>49.8&plusmn;1.2</td></tr>
+                <tr><td>Discrete Policy</td><td>VQ-based</td><td>2.0</td><td>&ndash;</td><td>60.8&plusmn;1.0</td></tr>
+                <tr><td>VQActFlow</td><td>VQ-based</td><td>1.0</td><td>0.0</td><td>71.8&plusmn;0.7</td></tr>
+                <tr><td>VQActFlow</td><td>VQ-based</td><td>1.0</td><td>1.0</td><td>74.2&plusmn;1.5</td></tr>
+                <tr><td>VQActFlow</td><td>VQ-based</td><td>2.0</td><td>0.0</td><td>76.6&plusmn;1.5</td></tr>
+                <tr class="highlight"><td>VQActFlow</td><td>VQ-based</td><td>2.0</td><td>1.0</td><td>79.3&plusmn;1.1</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </figure>
+        <p class="exp-sub" style="margin-top:-6px;">CFG helps both kinds of policy: at w=2 it adds 2.1 points to CFM
+          and 4.8 to VQActFlow. The critic adds 2.4 points on its own and 2.7 more on top of CFG. VQActFlow's 1.0-point
+          margin over CFM with CFG (95% CI [&minus;0.5, 2.4]) is within noise, while its margins over the other
+          baselines are significant.</p>
 
-        <div class="table-wrap">
-          <table class="results">
-            <caption><strong>Table V.</strong> Ablation on codebook size K, LIBERO-90, guidance disabled.</caption>
-            <thead>
-              <tr><th>Codebook size</th><th>128</th><th>256</th><th>512</th><th>1024</th></tr>
-            </thead>
-            <tbody>
-              <tr><td>Success rate</td><td>62.6</td><td>65.6</td><td><strong>72.3</strong></td><td>70.1</td></tr>
-            </tbody>
-          </table>
-        </div>
+        <figure class="table-wrap">
+          <figcaption><strong>Table V.</strong> Ablation on codebook size K, LIBERO-90, guidance disabled. Mean &plusmn; std over 5 evaluation seeds.</figcaption>
+          <div class="table-scroll">
+            <table class="results">
+              <thead>
+                <tr><th>Codebook size</th><th>128</th><th>256</th><th>512</th><th>1024</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Success rate</td><td>63.7&plusmn;0.8</td><td>67.3&plusmn;0.2</td><td><strong>71.8&plusmn;0.7</strong></td><td>70.6&plusmn;0.7</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </figure>
         <p class="exp-sub" style="margin-top:-6px;">Success peaks at K=512. Smaller codebooks limit how finely actions
           can be quantized; larger ones blow up the per-position classification space and make the categorical
           prediction harder to learn.</p>
+
+        <figure class="table-wrap">
+          <figcaption><strong>Table VI.</strong> LIBERO-90 success rate (%) for three independently trained seeds, each evaluated with one fixed evaluation seed.</figcaption>
+          <div class="table-scroll">
+            <table class="results">
+              <thead>
+                <tr><th>Method</th><th>CFG w</th><th>Critic &lambda;</th><th>Seed 1000</th><th>Seed 2000</th><th>Seed 3000</th><th>Mean &plusmn; std</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>CFM</td><td>&ndash;</td><td>&ndash;</td><td>75.9</td><td>76.0</td><td>74.2</td><td>75.4&plusmn;1.0</td></tr>
+                <tr><td>VQActFlow</td><td>1.0</td><td>0.0</td><td>72.6</td><td>72.1</td><td>71.9</td><td>72.2&plusmn;0.3</td></tr>
+                <tr><td>VQActFlow</td><td>1.0</td><td>1.0</td><td>74.4</td><td>73.8</td><td>73.5</td><td>73.9&plusmn;0.5</td></tr>
+                <tr><td>VQActFlow</td><td>2.0</td><td>0.0</td><td>78.9</td><td>79.1</td><td>78.0</td><td>78.7&plusmn;0.6</td></tr>
+                <tr class="highlight"><td>VQActFlow</td><td>2.0</td><td>1.0</td><td>80.9</td><td>80.3</td><td>78.5</td><td>79.9&plusmn;1.3</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </figure>
+        <p class="exp-sub" style="margin-top:-6px;">Results hold across training seeds. The spread across three
+          independently trained models (0.3&ndash;1.3 points) is no larger than the spread across evaluation seeds in
+          Table IV. Across the retrained models, CFG adds 6.5 points (95% CI [5.3, 7.6]) and the critic adds 1.7 at
+          w=1 ([1.5, 1.9]). On top of CFG the critic helps for all three seeds (+2.0, +1.2, +0.5), though three seeds
+          are too few to resolve that gain.</p>
+
+        <figure class="table-wrap">
+          <figcaption><strong>Table VII.</strong> LIBERO-90 success rate (%) vs. CFG weight w, critic disabled. Mean &plusmn; std over 3 evaluation seeds.</figcaption>
+          <div class="table-scroll">
+            <table class="results">
+              <thead>
+                <tr><th>CFG weight w</th><th>1.0</th><th>1.5</th><th>2.0</th><th>3.0</th><th>4.0</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Success rate</td><td>71.9&plusmn;1.0</td><td>76.4&plusmn;0.9</td><td><strong>77.1&plusmn;1.7</strong></td><td>72.4&plusmn;0.4</td><td>67.8&plusmn;1.0</td></tr>
+                <tr><td>Change vs. w=1</td><td>&ndash;</td><td>+4.5</td><td>+5.1</td><td>+0.4</td><td>&minus;4.2</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </figure>
+        <p class="exp-sub" style="margin-top:-6px;">The response to guidance has the same shape as on LIBERO-Goal:
+          clear gains at w=1.5 and 2, none at w=3, and a loss at w=4 (95% CI [&minus;7.4, &minus;0.9]). The w=2 used
+          here sits at the optimum, and the plateau from 1.5 to 2 means the choice needs no fine tuning. Each benchmark
+          uses one w for all of its tasks, picked by a coarse sweep. Benchmarks whose tasks share one fixed scene
+          (LIBERO-Goal, the G1, the bimanual platform) need stronger guidance, because only the instruction tells
+          their tasks apart.</p>
+
+        <figure class="table-wrap">
+          <figcaption><strong>Table VIII.</strong> LIBERO-90 success rate (%) vs. critic weight &lambda; at w=1, averaged over 3 evaluation seeds.</figcaption>
+          <div class="table-scroll">
+            <table class="results">
+              <thead>
+                <tr><th>Critic weight &lambda;</th><th>0</th><th>0.5</th><th>1</th><th>2</th><th>3</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Success rate</td><td>71.9</td><td>74.0</td><td>75.0</td><td>74.3</td><td>74.9</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </figure>
+        <p class="exp-sub" style="margin-top:-6px;">Every &lambda; from 0.5 to 3 beats running without the critic by
+          2&ndash;3 points in every evaluation seed, and no two values are separable, so the result does not depend on
+          a finely tuned critic weight.</p>
+
+        <figure class="table-wrap">
+          <figcaption><strong>Table IX.</strong> LIBERO-90 success rate (%) with learned task-ID embeddings vs. CLIP language embeddings. Mean &plusmn; std over 5 evaluation seeds; &Delta; with 95% CI.</figcaption>
+          <div class="table-scroll">
+            <table class="results">
+              <thead>
+                <tr><th>Guidance</th><th>Task ID</th><th>Language</th><th>&Delta; [95% CI]</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>w=1, &lambda;=0</td><td>60.6&plusmn;0.9</td><td>71.8&plusmn;0.7</td><td>&minus;11.3 [&minus;12.5, &minus;10.1]</td></tr>
+                <tr><td>w=1, &lambda;=1</td><td>62.4&plusmn;1.9</td><td>74.2&plusmn;1.5</td><td>&minus;11.8 [&minus;14.2, &minus;9.3]</td></tr>
+                <tr><td>w=2, &lambda;=0</td><td>72.7&plusmn;0.9</td><td>76.6&plusmn;1.5</td><td>&minus;3.9 [&minus;5.8, &minus;2.0]</td></tr>
+                <tr><td>w=2, &lambda;=1</td><td>74.1&plusmn;1.0</td><td>79.3&plusmn;1.1</td><td>&minus;5.2 [&minus;6.7, &minus;3.7]</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </figure>
+        <p class="exp-sub" style="margin-top:-6px;">Replacing the instruction with a learned task ID, one per unique
+          instruction (74 IDs, so both carry the same information), lowers success at every guidance setting: by 11.3
+          points at w=1 and 3.9 at w=2. The policy uses what the instruction says, not just which instruction it is.
+          CFG closes part of the gap, and the critic still helps with task IDs (+1.8 at w=1, +1.4 at w=2). All
+          instructions here were seen in training; generalization to new instructions is not tested.</p>
+      </div>
+
+      <!-- Codebook critic -->
+      <div class="exp-block">
+        <h3>What the codebook critic learns</h3>
+        <p class="exp-sub">The critic is trained only on demonstrations and constructed negatives. On LIBERO-90 we check
+          whether its scores track real rollout outcomes, and which negatives its guidance depends on.</p>
+
+        <figure class="table-wrap">
+          <figcaption><strong>Table X.</strong> Critic ranking accuracy (AUROC) on LIBERO-90 rollouts collected with the critic disabled.</figcaption>
+          <div class="table-scroll">
+            <table class="results">
+              <thead>
+                <tr><th>Scored unit</th><th>w=1</th><th>w=2</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Action chunks (successful vs. failed)</td><td>0.83</td><td>0.82</td></tr>
+                <tr><td>Episodes (mean chunk score vs. outcome)</td><td>0.97</td><td>0.96</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </figure>
+        <p class="exp-sub" style="margin-top:-6px;">We scored 4,500 rollouts per guidance weight, labeling each action
+          chunk as failed if it falls at or after the point where a failed episode goes wrong. The ranking also holds
+          within each task: the per-task AUROC averages 0.85 at w=1 and 0.83 at w=2, and all 90 tasks are above
+          chance.</p>
+
+        <figure class="table-wrap">
+          <figcaption><strong>Table XI.</strong> Negative-family ablation. Each row is a critic retrained with the listed negatives. Ranking: AUROC of successful vs. failed action chunks (w=2). Task disc.: AUROC of chunks scored under the correct vs. a wrong instruction. Success: LIBERO-90 success rate (%) with the critic guiding the policy (w=2, &lambda;=1). L wrong language, V wrong vision, O wrong observation, X cross-demonstration swap, R random code replacement, S temporal shuffle, T temporal shift.</figcaption>
+          <div class="table-scroll">
+            <table class="results ablation">
+              <thead>
+                <tr><th>Critic</th><th>Negatives</th><th>Ranking</th><th>Task disc.</th><th>Success</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>No critic</td><td>&ndash;</td><td>&ndash;</td><td>&ndash;</td><td>76.9</td></tr>
+                <tr class="highlight"><td>All seven (used in the paper)</td><td>L V O X R S T</td><td>0.82</td><td>0.97</td><td>78.8</td></tr>
+                <tr class="group"><td colspan="5">Leave one family out</td></tr>
+                <tr><td>No language</td><td>V O X R S T</td><td>0.78</td><td>0.96</td><td>79.0</td></tr>
+                <tr><td>No observation</td><td>L X R S T</td><td>0.83</td><td>0.96</td><td>78.2</td></tr>
+                <tr><td>No temporal</td><td>L V O X R</td><td>0.81</td><td>0.96</td><td>78.8</td></tr>
+                <tr><td>No code replacement</td><td>L V O S T</td><td>0.83</td><td>0.96</td><td>66.4</td></tr>
+                <tr><td>No conditioning (L, V, O)</td><td>X R S T</td><td>0.80</td><td>0.68</td><td>78.7</td></tr>
+                <tr class="group"><td colspan="5">Subsets</td></tr>
+                <tr><td>Code matching only</td><td>V O R S T</td><td>0.75</td><td>0.94</td><td>77.8</td></tr>
+                <tr><td>Code corruptions only</td><td>R S</td><td>0.75</td><td>0.60</td><td>76.3</td></tr>
+                <tr><td>Corruptions and shift only</td><td>R S T</td><td>0.75</td><td>0.59</td><td>76.7</td></tr>
+                <tr><td>Language only</td><td>L</td><td>0.77</td><td>0.98</td><td>76.8</td></tr>
+                <tr><td>Language and swap only</td><td>L X</td><td>0.81</td><td>0.97</td><td>73.9</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </figure>
+        <p class="exp-sub" style="margin-top:-6px;">Ranking outcomes well is not the same as guiding well. The critic
+          trained without code-replacement negatives ranks rollouts as well as the full critic (0.83) but, used as
+          guidance, drops success to 66.4%. Random replacement (R) and cross-demonstration swap (X) are the only
+          negatives that put codes from outside the episode at a fixed observation and instruction, and the gradient
+          needs both: keeping them without any conditioning negatives retains the full gain (78.7). The language and
+          observation negatives supply task discrimination (0.97 with them, 0.68 without) but are not needed for the
+          success gain, since CFG already conditions on the task. The critic's useful signal is feasibility: whether an
+          action is right for this instruction in this scene.</p>
       </div>
     </div>
   </section>
