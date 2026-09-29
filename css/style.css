@@ -329,6 +329,13 @@ figcaption {
 .demo-gallery.landscape .demo-stage { aspect-ratio: 16 / 9; }
 .demo-gallery.portrait  .demo-stage { aspect-ratio: 608 / 1080; }
 
+/* Low-resolution clips (424x240 workspace camera) are shown at native size. */
+.demo-gallery.compact .demo-stage {
+  max-width: 424px;
+  margin: 0 auto;
+  aspect-ratio: 53 / 30;
+}
+
 .demo-video {
   position: absolute;
   inset: 0;
