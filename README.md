@@ -11,17 +11,19 @@ from the paper, with the original figures and a BibTeX citation block.
 
 ```
 index.html            page content
-css/style.css          styling
+css/style.css          styling (LaTeX-style: Computer Modern, booktabs-style tables)
 js/main.js             copy-BibTeX button + experiment-video galleries
 assets/figures/        framework diagram and result charts
-assets/videos/         experiment demo clips (G1, bimanual, comparison)
+assets/fonts/          Computer Modern (CMU Serif/Typewriter) WOFF2 subsets, SIL OFL
+assets/videos/         experiment demo clips (G1, bimanual successes and failures, comparison)
 assets/videos/posters/ poster frames / reduced-motion fallbacks
 .nojekyll              tells GitHub Pages to skip Jekyll processing
 ```
 
 The G1 humanoid and bimanual experiment sections use interactive video galleries
-(pick a task to watch a rollout) instead of static setup photos. Clips are muted,
-looping, autoplaying H.264 with their metadata stripped.
+(pick a task to watch a rollout) instead of static setup photos. The bimanual section
+also has a gallery of failed rollouts from the unguided policy, for contrast. Clips are
+muted, looping, autoplaying H.264 with their metadata stripped.
 
 This is a plain static site — no build step, no dependencies.
 
