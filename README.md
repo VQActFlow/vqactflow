@@ -11,10 +11,10 @@ from the paper, with the original figures and a BibTeX citation block.
 
 ```
 index.html            page content
-css/style.css          styling (LaTeX-style: Computer Modern, booktabs-style tables)
+css/style.css          styling (paper-like: Source Serif 4, booktabs-style tables)
 js/main.js             copy-BibTeX button + experiment-video galleries
 assets/figures/        framework diagram and result charts
-assets/fonts/          Computer Modern (CMU Serif/Typewriter) WOFF2 subsets, SIL OFL
+assets/fonts/          Source Serif 4, self-hosted WOFF2, SIL OFL
 assets/videos/         experiment demo clips (G1, bimanual successes and failures, comparison)
 assets/videos/posters/ poster frames / reduced-motion fallbacks
 .nojekyll              tells GitHub Pages to skip Jekyll processing

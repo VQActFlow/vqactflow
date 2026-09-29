@@ -1,9 +1,8 @@
-Computer Modern Unicode (CMU Serif, CMU Typewriter Text), version 0.7.0
-Converted by Andrey V. Panov from TeX fonts. Some glyphs are copied from Blue Sky
-fonts released by AMS. https://cm-unicode.sourceforge.io/
+Source Serif 4 (variable: weight 200-900, optical size 8-60)
+Copyright 2014-2021 Adobe (http://www.adobe.com/), with Reserved Font Name "Source".
 
-The files in this directory are WOFF2 subsets (Latin, Greek, punctuation and
-common symbols) of the original fonts, made for this web page.
+The WOFF2 files in this directory are the unmodified Latin and Greek subsets from
+the Fontsource distribution (@fontsource-variable/source-serif-4 5.3.0).
 
 This Font Software is licensed under the SIL Open Font License, Version 1.1.
 This license is copied below, and is also available with a FAQ at:
