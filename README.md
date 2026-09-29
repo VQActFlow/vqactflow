@@ -22,7 +22,7 @@ assets/videos/posters/ poster frames / reduced-motion fallbacks
 
 The G1 humanoid and bimanual experiment sections use interactive video galleries
 (pick a task to watch a rollout) instead of static setup photos. The bimanual section
-also has a gallery of failed rollouts from the unguided policy, for contrast. Clips are
+also has a gallery of failed rollouts under weak guidance, for contrast. Clips are
 muted, looping, autoplaying H.264 with their metadata stripped.
 
 This is a plain static site — no build step, no dependencies.

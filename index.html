@@ -262,9 +262,10 @@
                       data-caption="Insert the cylinder into the hole: starts a two-arm handover instead" data-outcome="failure">Cylinder</button>
               <button class="demo-nav next" type="button" aria-label="Next case">&rsaquo;</button>
             </div>
-            <figcaption><strong>Figure 4.</strong> For contrast, failed rollouts of the unguided policy (w=1,
+            <figcaption><strong>Figure 4.</strong> For contrast, failed rollouts with weak guidance (w=1,
               &lambda;=0), recorded by the workspace camera. In each, the policy starts, or drifts toward, a motion
-              that belongs to a different task. These mode errors are what guidance targets (Table II).</figcaption>
+              that belongs to a different task. These failures are due to the weak guidance: raising it to w=4,
+              &lambda;=1 lifts average success from 45.0% to 77.5% (Table II).</figcaption>
           </figure>
         </div>
 
